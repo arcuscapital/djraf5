@@ -3,7 +3,7 @@ import { assignSongs, autoSongsUsed } from "../src/songs";
 import { judgeRun, newRunState, type Snapshot } from "../src/runWatch";
 import { findCurrent, rebuildPool, startingAt } from "../src/songs";
 import { measure, playbackGain } from "../src/loudness";
-import { celebrate, toGoHint } from "../src/trophies";
+import { addOnAir, etaBadge, finishShow, normalize, starRow, stars, toGoHint } from "../src/trophies";
 import type { Block, Track } from "../src/types";
 
 const t = (n: number): Track => ({ uri: `spotify:track:${n}`, name: `Song ${n}`, artist: "A", durationMs: 180000 });
@@ -173,24 +173,49 @@ describe("reordering songs (☰)", () => {
   });
 });
 
-describe("end-of-show celebration", () => {
-  it("five dance parties, then a gold record, then it starts again", () => {
-    let t = { parties: 0, golds: 16 };
-    const kinds: string[] = [];
-    for (let i = 0; i < 12; i++) { const c = celebrate(t); kinds.push(c.kind + ":" + c.trophies.parties + "/" + c.trophies.golds); t = c.trophies; }
-    expect(kinds).toEqual([
-      "party:1/16", "party:2/16", "party:3/16", "party:4/16", "party:5/16", "gold:0/17",
-      "party:1/17", "party:2/17", "party:3/17", "party:4/17", "party:5/17", "gold:0/18"
-    ]);
+describe("stars and gold records (time on air)", () => {
+  const T = (min: number, golds = 16) => ({ onAir: min * 60, golds });
+
+  it("a star every 30 minutes, five stars at most", () => {
+    expect(stars(T(0))).toBe(0);
+    expect(stars(T(29.9))).toBe(0);
+    expect(stars(T(30))).toBe(1);
+    expect(stars(T(87))).toBe(2);
+    expect(stars(T(150))).toBe(5);
+    expect(stars(T(400))).toBe(5);
   });
+
+  it("says the moment a star is earned, and only then", () => {
+    let t = T(29.95);
+    let r = addOnAir(t, 1); expect(r.newStar).toBe(false); t = r.trophies;
+    r = addOnAir(t, 1); expect(r.newStar).toBe(false); t = r.trophies;
+    r = addOnAir(t, 1); expect(r.newStar).toBe(true); t = r.trophies;
+    r = addOnAir(t, 1); expect(r.newStar).toBe(false);
+  });
+
+  it("a finished show is a dance party until five stars, then a gold record; extra time carries over", () => {
+    expect(finishShow(T(0.05)).kind).toBe("party"); // a 3-second show earns nothing
+    expect(finishShow(T(149)).kind).toBe("party");
+    const g = finishShow(T(157));
+    expect(g.kind).toBe("gold");
+    expect(g.trophies).toEqual({ onAir: 7 * 60, golds: 17 });
+    expect(finishShow(g.trophies).kind).toBe("party");
+  });
+
+  it("tells him what's left in minutes and songs, never a fraction", () => {
+    expect(toGoHint(T(87))).toBe("Next star in 3 min · about 1 song");
+    expect(toGoHint(T(0), 240)).toBe("Next star in 30 min · about 8 songs");
+    expect(toGoHint(T(60.5), 200)).toBe("Next star in 30 min · about 9 songs");
+    expect(toGoHint(T(150))).toBe("Five stars! Finish a show for your gold record!");
+    expect(starRow(T(87))).toBe("⭐⭐☆☆☆");
+    expect(etaBadge(T(87))).toBe("⭐ in 3 min");
+    expect(etaBadge(T(150))).toBe("🏆 Gold at the end!");
+  });
+
   it("copes with missing or odd saved numbers", () => {
-    expect(celebrate({ parties: NaN, golds: -3 })).toEqual({ kind: "party", trophies: { parties: 1, golds: 0 } });
-    expect(celebrate({ parties: 9, golds: 2 }).kind).toBe("gold");
-  });
-  it("tells him how many more shows until gold", () => {
-    expect(toGoHint(1)).toBe("4 more shows to a gold record");
-    expect(toGoHint(4)).toBe("1 more show to a gold record");
-    expect(toGoHint(5)).toBe("Next show wins a gold record!");
+    expect(normalize(null)).toEqual({ onAir: 0, golds: 0 });
+    expect(normalize({ onAir: NaN, golds: -3 })).toEqual({ onAir: 0, golds: 0 });
+    expect(normalize({ golds: 2.7 })).toEqual({ onAir: 0, golds: 2 });
   });
 });
 

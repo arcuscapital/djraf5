@@ -14,7 +14,7 @@ function versionFile(): Plugin {
 }
 
 export default defineConfig({
-  base: "/djraf4/",
+  base: "/djraf5/",
   define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   plugins: [versionFile()],
   build: { target: "es2020" }

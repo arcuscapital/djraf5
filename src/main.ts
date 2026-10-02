@@ -1,7 +1,7 @@
 import "./style.css";
 import { MusicPlayer, Recorder, preloadMusic, unlockAudio } from "./audio";
 import { handleRedirect, isLoggedIn, login } from "./auth";
-import { celebrateShowEnd, closeCelebration, previewCelebration } from "./celebrate";
+import { celebrateShowEnd, closeCelebration, onAirSecond, previewCelebration, saveNow, setSongLength, starBadge } from "./celebrate";
 import { makeReorderable } from "./listDrag";
 import { Show, TYPE_LABELS } from "./show";
 import { assignSongs, autoSongsUsed, rebuildPool } from "./songs";
@@ -46,7 +46,7 @@ const pickModal = $("pick-modal");
 const orderModal = $("order-modal");
 const allModals = [addModal, modeModal, recorderModal, songsModal, pickModal, orderModal];
 
-const VERSION_TAG = "v5 · " + BUILD_ID;
+const VERSION_TAG = "v6 · " + BUILD_ID;
 $("app-version-tag").textContent = VERSION_TAG;
 
 // ====================== BLOCK LIST ======================
@@ -538,6 +538,7 @@ function renderSource(message?: string) {
 function setSource(s: SongSource) {
   source = s;
   store.saveSource(s);
+  if (s.pool.length) setSongLength(s.pool.reduce((a, t) => a + t.durationMs, 0) / s.pool.length / 1000);
   invalidateResume();
   renderSource();
   renderBlocks();
@@ -893,6 +894,7 @@ function updateStartLabel() {
 
 function exitToBuilderInternal() {
   closeCelebration(true);
+  saveNow(); // minutes on air so far are kept even if the show stops early
   if (current?.running) {
     resumeFrom = current.index;
     resumeTracks = computeTracks();
@@ -996,6 +998,31 @@ async function init() {
   if (isLoggedIn()) await ensureDevice();
   else showLoggedOut();
 }
+
+// ====================== TIME ON AIR → STARS ======================
+// Once a second while the show is playing (not paused): another second on air.
+// The badge by ON AIR says how long until the next star; a star earned mid-show
+// pops up for a moment (no sound — the phone's own sounds can make the Spotify
+// app pause a song).
+const starEta = $("star-eta");
+const starPop = $("star-pop");
+let starPopTimer: number | null = null;
+function renderStarBadge() { starEta.textContent = starBadge(); }
+window.setInterval(() => {
+  if (!current?.running || current.paused) return;
+  if (onAirSecond()) {
+    show(starPop, true);
+    starPop.classList.remove("star-pop-go");
+    void starPop.offsetWidth; // restart the pop animation
+    starPop.classList.add("star-pop-go");
+    navigator.vibrate?.([30, 40, 30]);
+    if (starPopTimer !== null) clearTimeout(starPopTimer);
+    starPopTimer = window.setTimeout(() => show(starPop, false), 3500);
+  }
+  renderStarBadge();
+}, 1000);
+renderStarBadge();
+if (source?.pool.length) setSongLength(source.pool.reduce((a, t) => a + t.durationMs, 0) / source.pool.length / 1000);
 
 // ?demo=party or ?demo=gold shows the end-of-show celebration straight away.
 const demo = new URLSearchParams(location.search).get("demo");

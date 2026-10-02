@@ -183,7 +183,7 @@
         <span class="radio-icon">📻</span>
         <h1>Krom FM</h1>
       </div>
-      <span class="live-badge">ON AIR</span>
+      <span class="header-badges"><span class="star-eta" id="star-eta">⭐ in 30 min</span><span class="live-badge">ON AIR</span></span>
     </header>
 
     <div class="status-card" id="status-card">
@@ -204,6 +204,7 @@
     </div>
 
     <div class="trouble hidden" id="trouble"></div>
+    <div class="star-pop hidden" id="star-pop" aria-live="polite"><span class="star-pop-icon">⭐</span><span>You earned a star!</span></div>
 
     <div class="next-up" id="next-up">
       Next up: —
@@ -423,7 +424,7 @@
         <rect class="tile t5" x="240" y="300" width="60" height="30" fill="#9B59B6"/>
       </svg>
       <div class="cele-bar">
-        <span class="cele-count" title="Dance parties towards a gold record"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#cele-rec-black"/></svg><span id="party-count">1/5</span></span>
+        <span class="cele-stars" id="party-stars" title="Stars: one for every 30 minutes on air">☆☆☆☆☆</span>
         <span class="cele-wrap">That's a wrap!</span>
         <span class="cele-count" title="Gold records won"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#cele-rec-gold"/></svg><span id="party-golds">0</span></span>
       </div>
@@ -487,7 +488,7 @@
         <rect class="conf c10" x="120" y="0" width="9" height="6" fill="#E74C3C"/>
       </svg>
       <div class="cele-bar">
-        <span class="cele-count"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#cele-rec-black"/></svg><span>5/5</span></span>
+        <span class="cele-stars">⭐⭐⭐⭐⭐</span>
         <span class="cele-wrap">That's a wrap!</span>
         <span class="cele-count cele-pop" title="Gold records won"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#cele-rec-gold"/></svg><span id="gold-golds">1</span></span>
       </div>

@@ -1,13 +1,13 @@
-import type { Trophies } from "./trophies";
+import { normalize, type Trophies } from "./trophies";
 import type { Block, SongSource } from "./types";
 
 // This app shares a web address (arcuscapital.github.io) with the original
-// Krom FM and with /djraf/, /djraf2/ and /djraf3/, so browser storage is shared too. The show,
-// playlist and recordings use their own "djraf4" names so the apps can be
+// Krom FM and with /djraf/ … /djraf4/, so browser storage is shared too. The show,
+// playlist and recordings use their own "djraf5" names so the apps can be
 // compared side by side without touching each other. (The Spotify login is
 // deliberately shared with /djraf/ — see auth.ts.)
 
-const KEYS = { blocks: "djraf4_blocks", source: "djraf4_source", loop: "djraf4_loop" };
+const KEYS = { blocks: "djraf5_blocks", source: "djraf5_source", loop: "djraf5_loop" };
 
 export function defaultBlocks(): Block[] {
   return [
@@ -41,11 +41,19 @@ export const saveSource = (s: SongSource | null) => write(KEYS.source, s);
 export const loadLoop = () => read<boolean>(KEYS.loop, false);
 export const saveLoop = (v: boolean) => write(KEYS.loop, v);
 // Dance parties and gold records won (the end-of-show celebration).
-export const loadTrophies = () => read<Trophies>("djraf4_trophies", { parties: 0, golds: 0 });
-export const saveTrophies = (t: Trophies) => write("djraf4_trophies", t);
+// Stars (time on air) and gold records. First time here, his gold records come
+// across from /djraf4/ (same website, so its storage is readable); stars start
+// at zero because the rule changed from "shows" to "time on air".
+export function loadTrophies(): Trophies {
+  const mine = read<Partial<Trophies> | null>("djraf5_trophies", null);
+  if (mine) return normalize(mine);
+  const older = read<{ golds?: number } | null>("djraf4_trophies", null);
+  return normalize({ onAir: 0, golds: older?.golds ?? 0 });
+}
+export const saveTrophies = (t: Trophies) => write("djraf5_trophies", t);
 
 // ---------- recordings (IndexedDB) ----------
-const DB = "djraf4-db";
+const DB = "djraf5-db";
 const STORE = "recordings";
 let dbp: Promise<IDBDatabase> | null = null;
 
