@@ -68,11 +68,17 @@ export async function playChime(): Promise<void> {
 
 // ---------- end-of-show fanfare ----------
 // A happy run up the scale for a dance party; a bigger one for a gold record.
-export async function playFanfare(gold: boolean): Promise<void> {
+// A happy run up the scale: a little one for a dance party, longer for bronze,
+// silver and gold.
+const FANFARES: Record<string, [number, number, number][]> = {
+  party: [[523, 0, 0.12], [659, 0.12, 0.12], [784, 0.24, 0.12], [1047, 0.36, 0.4]],
+  bronze: [[523, 0, 0.14], [659, 0.14, 0.14], [784, 0.28, 0.5]],
+  silver: [[523, 0, 0.14], [659, 0.14, 0.14], [784, 0.28, 0.14], [1047, 0.42, 0.55]],
+  gold: [[523, 0, 0.14], [659, 0.14, 0.14], [784, 0.28, 0.14], [1047, 0.42, 0.3], [784, 0.75, 0.12], [1047, 0.9, 0.6]]
+};
+export async function playFanfare(kind: "party" | "bronze" | "silver" | "gold"): Promise<void> {
   const c = await acquire();
-  const notes: [number, number, number][] = gold
-    ? [[523, 0, 0.14], [659, 0.14, 0.14], [784, 0.28, 0.14], [1047, 0.42, 0.3], [784, 0.75, 0.12], [1047, 0.9, 0.6]]
-    : [[523, 0, 0.12], [659, 0.12, 0.12], [784, 0.24, 0.12], [1047, 0.36, 0.4]];
+  const notes = FANFARES[kind];
   const t0 = c.currentTime + 0.05;
   for (const [f, at, len] of notes) {
     const o = c.createOscillator();

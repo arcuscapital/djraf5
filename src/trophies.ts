@@ -1,73 +1,75 @@
-// The reward rule: time on air earns stars, stars earn gold records.
+// The reward rule: time on air earns records — bronze, then silver, then gold.
 //
 // Every 30 minutes on air (songs, jingles, news, recordings — anything playing,
-// not paused) earns a ⭐. Five stars make a gold record, awarded when a show
-// finishes. Minutes aren't lost when a show stops early; a 3-second show earns
-// nothing. (It used to be "5 finished shows = gold", which 3-second shows beat.)
+// not paused) earns the next record in the round: 30 min → bronze, another 30
+// → silver, another 30 → gold, then a new round starts at bronze. Minutes
+// aren't lost when a show stops early; a 3-second show earns nothing.
 
-export const STAR_MINUTES = 30;
-export const STARS_PER_GOLD = 5;
-const STAR_SECONDS = STAR_MINUTES * 60;
-const GOLD_SECONDS = STARS_PER_GOLD * STAR_SECONDS;
+export const RECORD_MINUTES = 30;
+export const RECORDS = ["bronze", "silver", "gold"] as const;
+export type Medal = (typeof RECORDS)[number];
+const RECORD_SECONDS = RECORD_MINUTES * 60;
+const ROUND_SECONDS = RECORDS.length * RECORD_SECONDS;
 
 export interface Trophies {
-  onAir: number; // seconds on air towards the next gold record
-  golds: number; // gold records won so far
+  onAir: number; // seconds into the current bronze → silver → gold round
+  bronze: number;
+  silver: number;
+  gold: number;
 }
 
-export interface Celebration {
-  kind: "party" | "gold";
-  trophies: Trophies; // the new totals, to show and save
-}
+export type Celebration = { kind: "party" | Medal; trophies: Trophies };
 
+const count = (v: unknown) => Math.max(0, Math.floor(Number(v)) || 0);
 export function normalize(t: Partial<Trophies> | null | undefined): Trophies {
-  return { onAir: Math.max(0, Math.floor(t?.onAir ?? 0) || 0), golds: Math.max(0, Math.floor(t?.golds ?? 0) || 0) };
+  return { onAir: count(t?.onAir) % ROUND_SECONDS, bronze: count(t?.bronze), silver: count(t?.silver), gold: count(t?.gold) };
 }
 
-// Stars earned so far towards the next gold record (0–5).
-export function stars(t: Trophies): number {
-  return Math.min(STARS_PER_GOLD, Math.floor(t.onAir / STAR_SECONDS));
+// Which record he's working towards right now.
+export function nextRecord(t: Trophies): Medal {
+  return RECORDS[Math.min(RECORDS.length - 1, Math.floor(t.onAir / RECORD_SECONDS))];
 }
 
-// Another second on air. `newStar` is true the moment a star is earned.
-export function addOnAir(t: Trophies, seconds: number): { trophies: Trophies; newStar: boolean } {
-  const before = stars(t);
-  const trophies = { ...t, onAir: t.onAir + Math.max(0, seconds) };
-  return { trophies, newStar: stars(trophies) > before };
+// Seconds until that record.
+export function toNext(t: Trophies): number {
+  return (Math.floor(t.onAir / RECORD_SECONDS) + 1) * RECORD_SECONDS - t.onAir;
 }
 
-// The show finished: a gold record if he has five stars, else a dance party.
-// Time past the five stars carries over towards the next gold record.
-export function finishShow(t: Trophies): Celebration {
-  if (stars(t) >= STARS_PER_GOLD) return { kind: "gold", trophies: { onAir: t.onAir - GOLD_SECONDS, golds: t.golds + 1 } };
-  return { kind: "party", trophies: t };
+// More seconds on air. `earned` is the record won the moment a 30-minute mark
+// is crossed (the last one, if a big jump crosses several).
+export function addOnAir(t: Trophies, seconds: number): { trophies: Trophies; earned: Medal | null } {
+  let onAir = t.onAir + Math.max(0, seconds);
+  const out = { ...t };
+  let earned: Medal | null = null;
+  let stage = Math.floor(t.onAir / RECORD_SECONDS);
+  while (onAir >= (stage + 1) * RECORD_SECONDS) {
+    earned = RECORDS[stage];
+    out[earned]++;
+    stage++;
+    if (stage === RECORDS.length) { onAir -= ROUND_SECONDS; stage = 0; }
+  }
+  return { trophies: { ...out, onAir }, earned };
 }
 
-// Seconds until the next star (0 when he already has all five).
-export function toNextStar(t: Trophies): number {
-  const s = stars(t);
-  return s >= STARS_PER_GOLD ? 0 : (s + 1) * STAR_SECONDS - t.onAir;
+// The show finished: the best record won during it, or a dance party.
+export function finishShow(t: Trophies, bestThisShow: Medal | null): Celebration {
+  return { kind: bestThisShow ?? "party", trophies: t };
 }
 
-// ⭐⭐☆☆☆
-export function starRow(t: Trophies): string {
-  const s = stars(t);
-  return "⭐".repeat(s) + "☆".repeat(STARS_PER_GOLD - s);
-}
+export const better = (a: Medal | null, b: Medal): Medal => (a && RECORDS.indexOf(a) > RECORDS.indexOf(b) ? a : b);
 
-// What to say under the stars so he knows how far off the next one is — in
+export const MEDAL_NAME: Record<Medal, string> = { bronze: "Bronze", silver: "Silver", gold: "Gold" };
+
+// What to say under the tally so he knows how far off the next record is — in
 // minutes and in songs, never a fraction he'd have to work out.
 export function toGoHint(t: Trophies, avgSongSeconds = 240): string {
-  const left = toNextStar(t);
-  if (left <= 0) return "Five stars! Finish a show for your gold record!";
+  const left = toNext(t);
   const min = Math.max(1, Math.ceil(left / 60));
   const songs = Math.max(1, Math.round(left / Math.max(60, avgSongSeconds)));
-  return `Next star in ${min} min · about ${songs} ${songs === 1 ? "song" : "songs"}`;
+  return `${MEDAL_NAME[nextRecord(t)]} record in ${min} min · about ${songs} ${songs === 1 ? "song" : "songs"}`;
 }
 
 // The short version for the live screen's badge.
 export function etaBadge(t: Trophies): string {
-  const left = toNextStar(t);
-  if (left <= 0) return "🏆 Gold at the end!";
-  return `⭐ in ${Math.max(1, Math.ceil(left / 60))} min`;
+  return `${MEDAL_NAME[nextRecord(t)]} in ${Math.max(1, Math.ceil(toNext(t) / 60))} min`;
 }

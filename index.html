@@ -23,6 +23,12 @@
         <symbol id="spark-star" viewBox="0 0 20 20">
           <path d="M10 0 L12.2 7.8 L20 10 L12.2 12.2 L10 20 L7.8 12.2 L0 10 L7.8 7.8 Z" fill="currentColor"/>
         </symbol>
+        <symbol id="cele-rec" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="11.5" fill="currentColor"/>
+          <circle cx="12" cy="12" r="8.5" fill="none" stroke="#000" stroke-opacity="0.22" stroke-width="1"/>
+          <circle cx="12" cy="12" r="4.2" fill="#fff" fill-opacity="0.9"/>
+          <circle cx="12" cy="12" r="1.3" fill="currentColor"/>
+        </symbol>
       </defs>
     </svg>
 
@@ -183,7 +189,7 @@
         <span class="radio-icon">📻</span>
         <h1>Krom FM</h1>
       </div>
-      <span class="header-badges"><span class="star-eta" id="star-eta">⭐ in 30 min</span><span class="live-badge">ON AIR</span></span>
+      <span class="header-badges"><span class="star-eta" id="star-eta"><svg class="rec-ico" id="star-eta-icon" viewBox="0 0 24 24" aria-hidden="true" style="color:#9C5A2A"><use href="#cele-rec"/></svg><span id="star-eta-text">Bronze in 30 min</span></span><span class="live-badge">ON AIR</span></span>
     </header>
 
     <div class="status-card" id="status-card">
@@ -204,7 +210,7 @@
     </div>
 
     <div class="trouble hidden" id="trouble"></div>
-    <div class="star-pop hidden" id="star-pop" aria-live="polite"><span class="star-pop-icon">⭐</span><span>You earned a star!</span></div>
+    <div class="star-pop hidden" id="star-pop" aria-live="polite"><svg class="star-pop-icon" id="star-pop-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#cele-rec"/></svg><span id="star-pop-text">You earned a bronze record!</span></div>
 
     <div class="next-up" id="next-up">
       Next up: —
@@ -320,14 +326,6 @@
         <symbol id="cele-star" viewBox="0 0 20 20">
           <path d="M10 0 L12.2 7.8 L20 10 L12.2 12.2 L10 20 L7.8 12.2 L0 10 L7.8 7.8 Z" fill="currentColor"/>
         </symbol>
-        <symbol id="cele-rec-black" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="11.5" fill="#26232f"/><circle cx="12" cy="12" r="8.5" fill="none" stroke="#4a4656" stroke-width="1"/>
-          <circle cx="12" cy="12" r="4.2" fill="#E74C3C"/><circle cx="12" cy="12" r="1.2" fill="#fff"/>
-        </symbol>
-        <symbol id="cele-rec-gold" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="11.5" fill="#F5C33B"/><circle cx="12" cy="12" r="8.5" fill="none" stroke="#c99a1c" stroke-width="1"/>
-          <circle cx="12" cy="12" r="4.2" fill="#fff"/><circle cx="12" cy="12" r="1.2" fill="#c99a1c"/>
-        </symbol>
       </defs>
     </svg>
 
@@ -424,16 +422,15 @@
         <rect class="tile t5" x="240" y="300" width="60" height="30" fill="#9B59B6"/>
       </svg>
       <div class="cele-bar">
-        <span class="cele-stars" id="party-stars" title="Stars: one for every 30 minutes on air">☆☆☆☆☆</span>
+        <span class="cele-tally" id="party-tally" title="Bronze, silver and gold records won"><span class="tally"><svg class="rec-ico" viewBox="0 0 24 24" aria-hidden="true" style="color:#9C5A2A"><use href="#cele-rec"/></svg><b data-medal="bronze">0</b></span><span class="tally"><svg class="rec-ico" viewBox="0 0 24 24" aria-hidden="true" style="color:#C9CED6"><use href="#cele-rec"/></svg><b data-medal="silver">0</b></span><span class="tally"><svg class="rec-ico" viewBox="0 0 24 24" aria-hidden="true" style="color:#E8B62C"><use href="#cele-rec"/></svg><b data-medal="gold">0</b></span></span>
         <span class="cele-wrap">That's a wrap!</span>
-        <span class="cele-count" title="Gold records won"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#cele-rec-gold"/></svg><span id="party-golds">0</span></span>
       </div>
       <p class="cele-hint" id="party-hint"></p>
     </div>
 
-    <!-- C: gold record -->
-    <div id="scene-gold" class="cele-scene hidden">
-      <h2 class="cele-title">Gold record!</h2>
+    <!-- C: a record — bronze, silver or gold -->
+    <div id="scene-record" class="cele-scene medal-gold hidden">
+      <h2 class="cele-title" id="record-title">Gold record!</h2>
       <svg class="cele-art" viewBox="0 0 300 330" aria-hidden="true">
         <g class="rays" fill="#fff">
           <path d="M150 150 L138 0 L162 0 Z" opacity="0.2"/><path d="M150 150 L138 0 L162 0 Z" opacity="0.12" transform="rotate(30 150 150)"/>
@@ -448,14 +445,14 @@
         <use href="#cele-star" class="glint g3" x="26" y="226" width="16" height="16" style="color:#fff"/>
         <use href="#cele-star" class="glint g4" x="256" y="214" width="22" height="22" style="color:#FFD9A0"/>
         <g class="rec-beat"><g class="rec-in"><g class="rec-spin">
-          <circle cx="150" cy="150" r="100" fill="#E8B62C"/>
-          <circle cx="150" cy="150" r="90" fill="none" stroke="#c99a1c" stroke-width="2"/>
-          <circle cx="150" cy="150" r="78" fill="none" stroke="#c99a1c" stroke-width="2"/>
-          <circle cx="150" cy="150" r="66" fill="none" stroke="#c99a1c" stroke-width="2"/>
-          <circle cx="150" cy="150" r="54" fill="none" stroke="#c99a1c" stroke-width="2"/>
-          <path d="M84 104 A80 80 0 0 1 150 70" fill="none" stroke="#fff4c2" stroke-width="6" stroke-linecap="round"/>
-          <path d="M216 196 A80 80 0 0 1 180 224" fill="none" stroke="#fff4c2" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
-          <circle cx="150" cy="150" r="38" fill="#E74C3C"/>
+          <circle class="rec-face" cx="150" cy="150" r="100"/>
+          <circle class="rec-groove" cx="150" cy="150" r="90" fill="none" stroke-width="2"/>
+          <circle class="rec-groove" cx="150" cy="150" r="78" fill="none" stroke-width="2"/>
+          <circle class="rec-groove" cx="150" cy="150" r="66" fill="none" stroke-width="2"/>
+          <circle class="rec-groove" cx="150" cy="150" r="54" fill="none" stroke-width="2"/>
+          <path class="rec-shine" d="M84 104 A80 80 0 0 1 150 70" fill="none" stroke-width="6" stroke-linecap="round"/>
+          <path class="rec-shine" d="M216 196 A80 80 0 0 1 180 224" fill="none" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+          <circle class="rec-label" cx="150" cy="150" r="38"/>
           <use href="#cele-star" x="128" y="128" width="44" height="44" style="color:#fff"/>
           <circle cx="150" cy="150" r="4" fill="#26232f"/>
         </g></g></g>
@@ -473,8 +470,8 @@
         <use href="#cele-note" class="burst bu4" x="140" y="120" width="22" height="28" style="color:#4dd9ff;--dx:98px;--dy:-78px;--r:16deg"/>
         <use href="#cele-note" class="burst bu5" x="140" y="120" width="22" height="28" style="color:#ff5fa2;--dx:0px;--dy:-132px;--r:-14deg"/>
         <g class="ribbon">
-          <path d="M40 262 L260 262 L246 284 L260 306 L40 306 L54 284 Z" fill="#E74C3C"/>
-          <text x="150" y="291" text-anchor="middle" font-size="21" font-weight="800" fill="#fff">Best DJ ever!</text>
+          <path class="rec-ribbon" d="M40 262 L260 262 L246 284 L260 306 L40 306 L54 284 Z"/>
+          <text id="record-ribbon" x="150" y="291" text-anchor="middle" font-size="21" font-weight="800" fill="#fff">Best DJ ever!</text>
         </g>
         <rect class="conf c1" x="20" y="0" width="9" height="6" fill="#F5A623"/>
         <rect class="conf c2" x="60" y="0" width="9" height="6" fill="#fff"/>
@@ -488,11 +485,10 @@
         <rect class="conf c10" x="120" y="0" width="9" height="6" fill="#E74C3C"/>
       </svg>
       <div class="cele-bar">
-        <span class="cele-stars">⭐⭐⭐⭐⭐</span>
+        <span class="cele-tally" id="record-tally" title="Bronze, silver and gold records won"><span class="tally"><svg class="rec-ico" viewBox="0 0 24 24" aria-hidden="true" style="color:#9C5A2A"><use href="#cele-rec"/></svg><b data-medal="bronze">0</b></span><span class="tally"><svg class="rec-ico" viewBox="0 0 24 24" aria-hidden="true" style="color:#C9CED6"><use href="#cele-rec"/></svg><b data-medal="silver">0</b></span><span class="tally"><svg class="rec-ico" viewBox="0 0 24 24" aria-hidden="true" style="color:#E8B62C"><use href="#cele-rec"/></svg><b data-medal="gold">0</b></span></span>
         <span class="cele-wrap">That's a wrap!</span>
-        <span class="cele-count cele-pop" title="Gold records won"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#cele-rec-gold"/></svg><span id="gold-golds">1</span></span>
       </div>
-      <p class="cele-hint" id="gold-hint"></p>
+      <p class="cele-hint" id="record-hint"></p>
     </div>
   </div>
 

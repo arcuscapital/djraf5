@@ -1,7 +1,7 @@
 import "./style.css";
 import { MusicPlayer, Recorder, preloadMusic, unlockAudio } from "./audio";
 import { handleRedirect, isLoggedIn, login } from "./auth";
-import { celebrateShowEnd, closeCelebration, onAirSecond, previewCelebration, saveNow, setSongLength, starBadge } from "./celebrate";
+import { badge, celebrateShowEnd, closeCelebration, MEDAL_COLOR, onAirSecond, previewCelebration, saveNow, setSongLength, showStarted } from "./celebrate";
 import { makeReorderable } from "./listDrag";
 import { Show, TYPE_LABELS } from "./show";
 import { assignSongs, autoSongsUsed, rebuildPool } from "./songs";
@@ -825,6 +825,7 @@ async function startShow(from: number, tracks: Map<string, Track[]>) {
   if (!blocks.length) { alert("Add at least one block!"); return; }
   await unlockAudio();
   current?.stop();
+  showStarted();
   current = new Show(blocks, tracks, deviceId, ui, () => {
     if (!loopEnabled) return null;
     advanceSource();
@@ -999,18 +1000,26 @@ async function init() {
   else showLoggedOut();
 }
 
-// ====================== TIME ON AIR → STARS ======================
+// ====================== TIME ON AIR → RECORDS ======================
 // Once a second while the show is playing (not paused): another second on air.
-// The badge by ON AIR says how long until the next star; a star earned mid-show
-// pops up for a moment (no sound — the phone's own sounds can make the Spotify
-// app pause a song).
-const starEta = $("star-eta");
+// The badge by ON AIR says how long until the next record (bronze, silver or
+// gold); one earned mid-show pops up for a moment (no sound — the phone's own
+// sounds can make the Spotify app pause a song).
+const starEtaText = $("star-eta-text");
+const starEtaIcon = $("star-eta-icon");
 const starPop = $("star-pop");
 let starPopTimer: number | null = null;
-function renderStarBadge() { starEta.textContent = starBadge(); }
+function renderStarBadge() {
+  const b = badge();
+  starEtaText.textContent = b.text;
+  starEtaIcon.style.color = MEDAL_COLOR[b.medal];
+}
 window.setInterval(() => {
   if (!current?.running || current.paused) return;
-  if (onAirSecond()) {
+  const earned = onAirSecond();
+  if (earned) {
+    $("star-pop-text").textContent = `You earned a ${earned} record!`;
+    $("star-pop-icon").style.color = MEDAL_COLOR[earned];
     show(starPop, true);
     starPop.classList.remove("star-pop-go");
     void starPop.offsetWidth; // restart the pop animation
@@ -1024,9 +1033,9 @@ window.setInterval(() => {
 renderStarBadge();
 if (source?.pool.length) setSongLength(source.pool.reduce((a, t) => a + t.durationMs, 0) / source.pool.length / 1000);
 
-// ?demo=party or ?demo=gold shows the end-of-show celebration straight away.
+// ?demo=party / bronze / silver / gold shows the end-of-show celebration straight away.
 const demo = new URLSearchParams(location.search).get("demo");
-if (demo === "party" || demo === "gold") previewCelebration(demo);
+if (demo === "party" || demo === "bronze" || demo === "silver" || demo === "gold") previewCelebration(demo);
 
 watchForUpdates(() => starting || !!current?.running || recorder.recording || !recorderModal.classList.contains("hidden"));
 runSplash();

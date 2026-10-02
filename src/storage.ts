@@ -41,14 +41,13 @@ export const saveSource = (s: SongSource | null) => write(KEYS.source, s);
 export const loadLoop = () => read<boolean>(KEYS.loop, false);
 export const saveLoop = (v: boolean) => write(KEYS.loop, v);
 // Dance parties and gold records won (the end-of-show celebration).
-// Stars (time on air) and gold records. First time here, his gold records come
-// across from /djraf4/ (same website, so its storage is readable); stars start
-// at zero because the rule changed from "shows" to "time on air".
+// Records won (time on air). Older saves are carried across: this version's
+// first rule counted stars and gold records; /djraf4/ counted gold records.
 export function loadTrophies(): Trophies {
-  const mine = read<Partial<Trophies> | null>("djraf5_trophies", null);
-  if (mine) return normalize(mine);
+  const mine = read<(Partial<Trophies> & { golds?: number }) | null>("djraf5_trophies", null);
+  if (mine) return normalize({ ...mine, gold: mine.gold ?? mine.golds });
   const older = read<{ golds?: number } | null>("djraf4_trophies", null);
-  return normalize({ onAir: 0, golds: older?.golds ?? 0 });
+  return normalize({ gold: older?.golds ?? 0 });
 }
 export const saveTrophies = (t: Trophies) => write("djraf5_trophies", t);
 

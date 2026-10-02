@@ -3,7 +3,7 @@ import { assignSongs, autoSongsUsed } from "../src/songs";
 import { judgeRun, newRunState, type Snapshot } from "../src/runWatch";
 import { findCurrent, rebuildPool, startingAt } from "../src/songs";
 import { measure, playbackGain } from "../src/loudness";
-import { addOnAir, etaBadge, finishShow, normalize, starRow, stars, toGoHint } from "../src/trophies";
+import { addOnAir, better, etaBadge, finishShow, nextRecord, normalize, toGoHint, toNext, type Trophies } from "../src/trophies";
 import type { Block, Track } from "../src/types";
 
 const t = (n: number): Track => ({ uri: `spotify:track:${n}`, name: `Song ${n}`, artist: "A", durationMs: 180000 });
@@ -173,49 +173,57 @@ describe("reordering songs (☰)", () => {
   });
 });
 
-describe("stars and gold records (time on air)", () => {
-  const T = (min: number, golds = 16) => ({ onAir: min * 60, golds });
+describe("bronze, silver and gold records (time on air)", () => {
+  const T = (min: number, extra: Partial<Trophies> = {}): Trophies => ({ onAir: min * 60, bronze: 0, silver: 0, gold: 0, ...extra });
 
-  it("a star every 30 minutes, five stars at most", () => {
-    expect(stars(T(0))).toBe(0);
-    expect(stars(T(29.9))).toBe(0);
-    expect(stars(T(30))).toBe(1);
-    expect(stars(T(87))).toBe(2);
-    expect(stars(T(150))).toBe(5);
-    expect(stars(T(400))).toBe(5);
+  it("works towards bronze, then silver, then gold", () => {
+    expect(nextRecord(T(0))).toBe("bronze");
+    expect(nextRecord(T(29.9))).toBe("bronze");
+    expect(nextRecord(T(30))).toBe("silver");
+    expect(nextRecord(T(75))).toBe("gold");
+    expect(toNext(T(75))).toBe(15 * 60);
   });
 
-  it("says the moment a star is earned, and only then", () => {
+  it("awards the record the moment a 30-minute mark is crossed, then starts a new round after gold", () => {
     let t = T(29.95);
-    let r = addOnAir(t, 1); expect(r.newStar).toBe(false); t = r.trophies;
-    r = addOnAir(t, 1); expect(r.newStar).toBe(false); t = r.trophies;
-    r = addOnAir(t, 1); expect(r.newStar).toBe(true); t = r.trophies;
-    r = addOnAir(t, 1); expect(r.newStar).toBe(false);
+    let r = addOnAir(t, 1); expect(r.earned).toBeNull(); t = r.trophies;
+    r = addOnAir(t, 1); expect(r.earned).toBeNull(); t = r.trophies;
+    r = addOnAir(t, 1); expect(r.earned).toBe("bronze"); t = r.trophies;
+    expect(t.bronze).toBe(1);
+    r = addOnAir(t, 1); expect(r.earned).toBeNull();
+    const s = addOnAir(T(59.99), 1); expect(s.earned).toBe("silver"); expect(s.trophies.silver).toBe(1);
+    const g = addOnAir({ ...T(0, { gold: 4 }), onAir: 5399 }, 1);
+    expect(g.earned).toBe("gold");
+    expect(g.trophies).toEqual({ onAir: 0, bronze: 0, silver: 0, gold: 5 });
+    expect(nextRecord(g.trophies)).toBe("bronze");
   });
 
-  it("a finished show is a dance party until five stars, then a gold record; extra time carries over", () => {
-    expect(finishShow(T(0.05)).kind).toBe("party"); // a 3-second show earns nothing
-    expect(finishShow(T(149)).kind).toBe("party");
-    const g = finishShow(T(157));
-    expect(g.kind).toBe("gold");
-    expect(g.trophies).toEqual({ onAir: 7 * 60, golds: 17 });
-    expect(finishShow(g.trophies).kind).toBe("party");
+  it("a big jump crossing several marks awards them all and keeps the spare minutes", () => {
+    const r = addOnAir(T(10), 100 * 60);
+    expect(r.earned).toBe("gold");
+    expect(r.trophies).toEqual({ onAir: 20 * 60, bronze: 1, silver: 1, gold: 1 });
   });
 
-  it("tells him what's left in minutes and songs, never a fraction", () => {
-    expect(toGoHint(T(87))).toBe("Next star in 3 min · about 1 song");
-    expect(toGoHint(T(0), 240)).toBe("Next star in 30 min · about 8 songs");
-    expect(toGoHint(T(60.5), 200)).toBe("Next star in 30 min · about 9 songs");
-    expect(toGoHint(T(150))).toBe("Five stars! Finish a show for your gold record!");
-    expect(starRow(T(87))).toBe("⭐⭐☆☆☆");
-    expect(etaBadge(T(87))).toBe("⭐ in 3 min");
-    expect(etaBadge(T(150))).toBe("🏆 Gold at the end!");
+  it("a finished show celebrates the best record won during it, else a dance party", () => {
+    expect(finishShow(T(0.05), null).kind).toBe("party"); // a 3-second show earns nothing
+    expect(finishShow(T(31), "bronze").kind).toBe("bronze");
+    expect(better(null, "bronze")).toBe("bronze");
+    expect(better("bronze", "silver")).toBe("silver");
+    expect(better("gold", "bronze")).toBe("gold");
   });
 
-  it("copes with missing or odd saved numbers", () => {
-    expect(normalize(null)).toEqual({ onAir: 0, golds: 0 });
-    expect(normalize({ onAir: NaN, golds: -3 })).toEqual({ onAir: 0, golds: 0 });
-    expect(normalize({ golds: 2.7 })).toEqual({ onAir: 0, golds: 2 });
+  it("tells him what's next in minutes and songs, never a fraction", () => {
+    expect(toGoHint(T(27))).toBe("Bronze record in 3 min · about 1 song");
+    expect(toGoHint(T(30), 240)).toBe("Silver record in 30 min · about 8 songs");
+    expect(toGoHint(T(60.5), 200)).toBe("Gold record in 30 min · about 9 songs");
+    expect(etaBadge(T(27))).toBe("Bronze in 3 min");
+    expect(etaBadge(T(75))).toBe("Gold in 15 min");
+  });
+
+  it("copes with missing or odd saved numbers, and old saves", () => {
+    expect(normalize(null)).toEqual({ onAir: 0, bronze: 0, silver: 0, gold: 0 });
+    expect(normalize({ onAir: NaN, gold: -3 })).toEqual({ onAir: 0, bronze: 0, silver: 0, gold: 0 });
+    expect(normalize({ gold: 2.7, onAir: 5400 + 60 })).toEqual({ onAir: 60, bronze: 0, silver: 0, gold: 2 });
   });
 });
 

@@ -1077,7 +1077,7 @@ header h1 {
 .cele-count { display: flex; align-items: center; gap: 6px; }
 .cele-count svg { width: 30px; height: 30px; flex: none; }
 .cele-wrap { font-size: 1rem; white-space: nowrap; }
-.cele-pop { animation: countPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 1.8s both; }
+.cele-pop { animation: countPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 1.8s both; transform-origin: center; }
 @keyframes countPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.6); } }
 .cele-hint { color: #fff; font-weight: 700; font-size: 1.05rem; margin: 10px 0 0; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); animation: loadingFadeIn 0.5s ease-out 1.5s both; }
 
@@ -1219,3 +1219,28 @@ header h1 {
 .star-pop.star-pop-go .star-pop-icon { animation: starSpin 0.8s ease-out both; }
 @keyframes starPopIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes starSpin { from { transform: rotate(-360deg) scale(0.2); } to { transform: rotate(0deg) scale(1); } }
+
+/* ===== v6b: bronze → silver → gold records ===== */
+.rec-ico { width: 22px; height: 22px; flex: none; }
+.star-eta { display: inline-flex; align-items: center; gap: 5px; }
+.cele-tally { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; }
+.tally { display: inline-flex; align-items: center; gap: 4px; }
+.tally b { font-weight: 800; }
+.star-pop-icon { width: 30px; height: 30px; flex: none; color: #9C5A2A; }
+#scene-record.medal-gold .rec-face { fill: #E8B62C; }
+#scene-record.medal-gold .rec-groove { stroke: #c99a1c; }
+#scene-record.medal-gold .rec-shine { stroke: #fff4c2; }
+#scene-record.medal-gold .rec-label { fill: #E74C3C; }
+#scene-record.medal-gold .rec-ribbon { fill: #E74C3C; }
+#scene-record.medal-silver .rec-face { fill: #C9CED6; }
+#scene-record.medal-silver .rec-groove { stroke: #8f9bb5; }
+#scene-record.medal-silver .rec-shine { stroke: #ffffff; }
+#scene-record.medal-silver .rec-label { fill: #4A90E2; }
+#scene-record.medal-silver .rec-ribbon { fill: #4A90E2; }
+/* bronze: deep copper-brown, navy centre, green ribbon — nothing like gold */
+#scene-record.medal-bronze .rec-face { fill: #9C5A2A; }
+#scene-record.medal-bronze .rec-groove { stroke: #5a3315; }
+#scene-record.medal-bronze .rec-shine { stroke: #f2c9a0; }
+#scene-record.medal-bronze .rec-label { fill: #1e3a5f; }
+#scene-record.medal-bronze .rec-ribbon { fill: #27AE60; }
+
