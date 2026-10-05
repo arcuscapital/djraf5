@@ -59,17 +59,3 @@ export function finishShow(t: Trophies, bestThisShow: Medal | null): Celebration
 export const better = (a: Medal | null, b: Medal): Medal => (a && RECORDS.indexOf(a) > RECORDS.indexOf(b) ? a : b);
 
 export const MEDAL_NAME: Record<Medal, string> = { bronze: "Bronze", silver: "Silver", gold: "Gold" };
-
-// What to say under the tally so he knows how far off the next record is — in
-// minutes and in songs, never a fraction he'd have to work out.
-export function toGoHint(t: Trophies, avgSongSeconds = 240): string {
-  const left = toNext(t);
-  const min = Math.max(1, Math.ceil(left / 60));
-  const songs = Math.max(1, Math.round(left / Math.max(60, avgSongSeconds)));
-  return `${MEDAL_NAME[nextRecord(t)]} record in ${min} min · about ${songs} ${songs === 1 ? "song" : "songs"}`;
-}
-
-// The short version for the live screen's badge.
-export function etaBadge(t: Trophies): string {
-  return `${MEDAL_NAME[nextRecord(t)]} in ${Math.max(1, Math.ceil(toNext(t) / 60))} min`;
-}

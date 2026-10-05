@@ -3,7 +3,7 @@ import { assignSongs, autoSongsUsed } from "../src/songs";
 import { judgeRun, newRunState, type Snapshot } from "../src/runWatch";
 import { findCurrent, rebuildPool, startingAt } from "../src/songs";
 import { measure, playbackGain } from "../src/loudness";
-import { addOnAir, better, etaBadge, finishShow, nextRecord, normalize, toGoHint, toNext, type Trophies } from "../src/trophies";
+import { addOnAir, better, finishShow, nextRecord, normalize, toNext, type Trophies } from "../src/trophies";
 import type { Block, Track } from "../src/types";
 
 const t = (n: number): Track => ({ uri: `spotify:track:${n}`, name: `Song ${n}`, artist: "A", durationMs: 180000 });
@@ -210,14 +210,6 @@ describe("bronze, silver and gold records (time on air)", () => {
     expect(better(null, "bronze")).toBe("bronze");
     expect(better("bronze", "silver")).toBe("silver");
     expect(better("gold", "bronze")).toBe("gold");
-  });
-
-  it("tells him what's next in minutes and songs, never a fraction", () => {
-    expect(toGoHint(T(27))).toBe("Bronze record in 3 min · about 1 song");
-    expect(toGoHint(T(30), 240)).toBe("Silver record in 30 min · about 8 songs");
-    expect(toGoHint(T(60.5), 200)).toBe("Gold record in 30 min · about 9 songs");
-    expect(etaBadge(T(27))).toBe("Bronze in 3 min");
-    expect(etaBadge(T(75))).toBe("Gold in 15 min");
   });
 
   it("copes with missing or odd saved numbers, and old saves", () => {

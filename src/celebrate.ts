@@ -1,6 +1,6 @@
 import { playFanfare } from "./audio";
 import { loadTrophies, saveTrophies } from "./storage";
-import { addOnAir, better, etaBadge, finishShow, MEDAL_NAME, nextRecord, toGoHint, type Celebration, type Medal, type Trophies } from "./trophies";
+import { addOnAir, better, finishShow, MEDAL_NAME, type Celebration, type Medal, type Trophies } from "./trophies";
 
 // Records for time on air (see trophies.ts for the rule), and the fun bit when
 // a show finishes: a dance party, or the record he won during the show. Short
@@ -15,14 +15,8 @@ export const MEDAL_COLOR: Record<Medal, string> = { bronze: "#9C5A2A", silver: "
 const RIBBON: Record<Medal, string> = { bronze: "Nice one, DJ!", silver: "Super DJ!", gold: "Best DJ ever!" };
 
 let trophies: Trophies = loadTrophies();
-let avgSongSeconds = 240;
 let unsaved = 0;
 let bestThisShow: Medal | null = null; // the record to celebrate when this show finishes
-
-// How long his songs are, so "about 3 songs" is roughly right.
-export function setSongLength(seconds: number): void {
-  if (seconds > 60) avgSongSeconds = seconds;
-}
 
 export function showStarted(): void {
   bestThisShow = null;
@@ -42,9 +36,6 @@ export function saveNow(): void {
   saveTrophies(trophies);
   unsaved = 0;
 }
-
-// The little badge on the live screen: "Silver in 12 min", coloured to match.
-export const badge = () => ({ text: etaBadge(trophies), medal: nextRecord(trophies) });
 
 export function celebrateShowEnd(): void {
   const c = finishShow(trophies, bestThisShow);
@@ -75,19 +66,14 @@ function showCelebration(c: Celebration, autoClose: boolean): void {
   rec.classList.toggle("hidden", c.kind === "party");
   if (c.kind === "party") {
     fillTally($("party-tally"), t, null);
-    const none = t.bronze + t.silver + t.gold === 0 && t.onAir < 60;
-    $("party-hint").textContent = none
-      ? "Records come from time on air: bronze, then silver, then gold — 30 minutes each."
-      : toGoHint(t, avgSongSeconds);
   } else {
     const m = c.kind;
     rec.className = `cele-scene medal-${m}`;
     $("record-title").textContent = `${MEDAL_NAME[m]} record!`;
     $("record-ribbon").textContent = RIBBON[m];
     fillTally($("record-tally"), t, m);
-    $("record-hint").textContent = m === "gold"
-      ? `That's ${t.gold} gold ${t.gold === 1 ? "record" : "records"}! New round: bronze in 30 min.`
-      : `Next up: ${toGoHint(t, avgSongSeconds).toLowerCase()}`;
+    // No countdown to the next one — just the win.
+    $("record-hint").textContent = t[m] === 1 ? `Your first ${m} record!` : `That's ${t[m]} ${m} records!`;
   }
   // Showing it again restarts all the animations from the beginning.
   root.classList.remove("closing");

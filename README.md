@@ -8,10 +8,10 @@ https://arcuscapital.github.io/raf-radio-station/.
 v6 = v5 with the reward rule changed from "shows" to "time on air" (`src/trophies.ts`, tested):
 every 30 minutes on air (anything playing, not paused) earns the next record in the round —
 bronze, then silver, then gold — and after gold a new round starts at bronze. Spare minutes
-carry over; a show stopped early keeps its minutes; a 3-second show earns nothing. The badge by
-ON AIR counts down to the next record ("Silver in 12 min"), a record earned mid-show pops up,
-and the end-of-show celebration is that record (coloured bronze/silver/gold) or the dance
-party, with a tally of records won and "Next up: silver record in 12 min · about 3 songs".
+carry over; a show stopped early keeps its minutes; a 3-second show earns nothing. There is no
+countdown shown anywhere (parent's choice): a record earned mid-show just pops up, and the
+end-of-show celebration is that record (coloured bronze/silver/gold) or the dance party, with a
+tally of records won.
 Gold records carry across from /djraf4/. `?demo=party|bronze|silver|gold` previews a scene.
 
 ## How it avoids repeated songs

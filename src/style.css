@@ -1205,8 +1205,6 @@ header h1 {
 
 
 /* ===== v6: stars for time on air ===== */
-.header-badges { display: flex; align-items: center; gap: 8px; }
-.star-eta { background: #fff; color: #1e3a5f; border: 2px solid #F5A623; font-size: 0.75rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
 .cele-stars { font-size: 1.25rem; letter-spacing: 1px; white-space: nowrap; }
 .star-pop {
   display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -1222,7 +1220,6 @@ header h1 {
 
 /* ===== v6b: bronze → silver → gold records ===== */
 .rec-ico { width: 22px; height: 22px; flex: none; }
-.star-eta { display: inline-flex; align-items: center; gap: 5px; }
 .cele-tally { display: flex; align-items: center; gap: 12px; font-size: 1.1rem; }
 .tally { display: inline-flex; align-items: center; gap: 4px; }
 .tally b { font-weight: 800; }

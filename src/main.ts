@@ -1,7 +1,7 @@
 import "./style.css";
 import { MusicPlayer, Recorder, preloadMusic, unlockAudio } from "./audio";
 import { handleRedirect, isLoggedIn, login } from "./auth";
-import { badge, celebrateShowEnd, closeCelebration, MEDAL_COLOR, onAirSecond, previewCelebration, saveNow, setSongLength, showStarted } from "./celebrate";
+import { celebrateShowEnd, closeCelebration, MEDAL_COLOR, onAirSecond, previewCelebration, saveNow, showStarted } from "./celebrate";
 import { makeReorderable } from "./listDrag";
 import { Show, TYPE_LABELS } from "./show";
 import { assignSongs, autoSongsUsed, rebuildPool } from "./songs";
@@ -538,7 +538,6 @@ function renderSource(message?: string) {
 function setSource(s: SongSource) {
   source = s;
   store.saveSource(s);
-  if (s.pool.length) setSongLength(s.pool.reduce((a, t) => a + t.durationMs, 0) / s.pool.length / 1000);
   invalidateResume();
   renderSource();
   renderBlocks();
@@ -1002,18 +1001,11 @@ async function init() {
 
 // ====================== TIME ON AIR → RECORDS ======================
 // Once a second while the show is playing (not paused): another second on air.
-// The badge by ON AIR says how long until the next record (bronze, silver or
-// gold); one earned mid-show pops up for a moment (no sound — the phone's own
-// sounds can make the Spotify app pause a song).
-const starEtaText = $("star-eta-text");
-const starEtaIcon = $("star-eta-icon");
+// A record earned mid-show pops up for a moment (no sound — the phone's own
+// sounds can make the Spotify app pause a song). There's deliberately no
+// countdown anywhere: the record just arrives.
 const starPop = $("star-pop");
 let starPopTimer: number | null = null;
-function renderStarBadge() {
-  const b = badge();
-  starEtaText.textContent = b.text;
-  starEtaIcon.style.color = MEDAL_COLOR[b.medal];
-}
 window.setInterval(() => {
   if (!current?.running || current.paused) return;
   const earned = onAirSecond();
@@ -1028,10 +1020,7 @@ window.setInterval(() => {
     if (starPopTimer !== null) clearTimeout(starPopTimer);
     starPopTimer = window.setTimeout(() => show(starPop, false), 3500);
   }
-  renderStarBadge();
 }, 1000);
-renderStarBadge();
-if (source?.pool.length) setSongLength(source.pool.reduce((a, t) => a + t.durationMs, 0) / source.pool.length / 1000);
 
 // ?demo=party / bronze / silver / gold shows the end-of-show celebration straight away.
 const demo = new URLSearchParams(location.search).get("demo");
