@@ -1060,7 +1060,7 @@ header h1 {
 .cele-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px;
   width: 100%;
   max-width: 340px;

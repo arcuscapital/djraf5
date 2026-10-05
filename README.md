@@ -10,8 +10,8 @@ every 30 minutes on air (anything playing, not paused) earns the next record in 
 bronze, then silver, then gold — and after gold a new round starts at bronze. Spare minutes
 carry over; a show stopped early keeps its minutes; a 3-second show earns nothing. There is no
 countdown shown anywhere (parent's choice): a record earned mid-show just pops up, and the
-end-of-show celebration is that record (coloured bronze/silver/gold) or the dance party, with a
-tally of records won.
+end-of-show celebration is that record (coloured bronze/silver/gold) or the dance party. No
+tally of records won is shown either; the counts are still saved.
 Gold records carry across from /djraf4/. `?demo=party|bronze|silver|gold` previews a scene.
 
 ## How it avoids repeated songs

@@ -51,29 +51,17 @@ export function previewCelebration(kind: "party" | Medal): void {
   showCelebration(c, false);
 }
 
-function fillTally(el: HTMLElement, t: Trophies, pop: Medal | null) {
-  el.querySelectorAll<HTMLElement>("b[data-medal]").forEach(b => {
-    const m = b.dataset.medal as Medal;
-    b.textContent = String(t[m]);
-    b.parentElement!.classList.toggle("cele-pop", m === pop);
-  });
-}
-
 function showCelebration(c: Celebration, autoClose: boolean): void {
-  const t = c.trophies;
   $("scene-party").classList.toggle("hidden", c.kind !== "party");
   const rec = $("scene-record");
   rec.classList.toggle("hidden", c.kind === "party");
   if (c.kind === "party") {
-    fillTally($("party-tally"), t, null);
   } else {
     const m = c.kind;
     rec.className = `cele-scene medal-${m}`;
     $("record-title").textContent = `${MEDAL_NAME[m]} record!`;
     $("record-ribbon").textContent = RIBBON[m];
-    fillTally($("record-tally"), t, m);
-    // No countdown to the next one — just the win.
-    $("record-hint").textContent = t[m] === 1 ? `Your first ${m} record!` : `That's ${t[m]} ${m} records!`;
+
   }
   // Showing it again restarts all the animations from the beginning.
   root.classList.remove("closing");
