@@ -1,5 +1,5 @@
 import "./style.css";
-import { MusicPlayer, Recorder, preloadMusic, unlockAudio } from "./audio";
+import { Recorder, preloadMusic, unlockAudio } from "./audio";
 import { handleRedirect, isLoggedIn, login } from "./auth";
 import { celebrateShowEnd, closeCelebration, MEDAL_COLOR, onAirSecond, previewCelebration, saveNow, showStarted } from "./celebrate";
 import { makeReorderable } from "./listDrag";
@@ -319,9 +319,10 @@ function finalize() {
 
 // ---------- recorder ----------
 // No time limit: he starts and stops it. The background music button is off
-// until he taps it; the song loops for as long as he records.
+// until he taps it. With it on, nothing plays while he records (the phone's
+// speaker sits next to its mic, so anything played would end up in the take);
+// the song is added under his voice on air instead.
 const recorder = new Recorder();
-const recordMusic = new MusicPlayer();
 const recMain = $<HTMLButtonElement>("recorder-main-btn");
 const recMusicBtn = $<HTMLButtonElement>("recorder-music-btn");
 const recTimer = $("recorder-timer");
@@ -337,21 +338,14 @@ function drawMusicButton(btn: HTMLElement, on: boolean) {
   btn.classList.toggle("on", on);
   btn.textContent = on ? "🎶 Background music: ON" : "🎶 Background music: OFF";
 }
-// While recording, the song plays only as a quiet cue (3%) so the mic picks up
-// as little of it as possible; the proper level is added back on air.
-const RECORD_CUE_VOLUME = 0.03;
+let recMusicOn = false;
 function setRecordMusic(on: boolean) {
-  if (on) {
-    void unlockAudio();
-    void recordMusic.start(RECORD_CUE_VOLUME);
-  } else if (recordMusic.wanted) {
-    recordMusic.stop(600);
-  }
+  recMusicOn = on;
   drawMusicButton(recMusicBtn, on);
 }
 // The choice is made before he presses record (the button is locked while
 // recording), so a take is either with music or without — never half and half.
-recMusicBtn.addEventListener("click", () => { if (!recorder.recording && !micStarting) setRecordMusic(!recordMusic.wanted); });
+recMusicBtn.addEventListener("click", () => { if (!recorder.recording && !micStarting) setRecordMusic(!recMusicOn); });
 
 function resetRecorderUI() {
   show(recMain, true);
@@ -371,7 +365,7 @@ function resetRecorderUI() {
 }
 function openRecorder() {
   resetRecorderUI();
-  $("recorder-hint").textContent = "Want music under it? Tap 🎶 Background music first. Then tap the button, say your bit, and tap stop.";
+  $("recorder-hint").textContent = "Want music under it? Tap 🎶 Background music first — you won't hear it while you record; it plays under your voice on air. Then tap the button, say your bit, and tap stop.";
   openModal(recorderModal);
 }
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
@@ -396,7 +390,7 @@ recMain.addEventListener("click", async () => {
     micStarting = false;
   }
   if (recorderModal.classList.contains("hidden")) { void recorder.stop(); return; } // closed while waiting
-  recMusicUsed = recordMusic.wanted;
+  recMusicUsed = recMusicOn;
   recMusicBtn.disabled = true;
   recSeconds = 0;
   recTimer.textContent = "0:00";
