@@ -4,11 +4,11 @@ import { addOnAir, better, finishShow, MEDAL_NAME, type Celebration, type Medal,
 
 // Records for time on air (see trophies.ts for the rule), and the fun bit when
 // a show finishes: a dance party, or the record he won during the show. Short
-// (about 6 seconds), and the ✕ ends it straight away.
+// (40 seconds, the parent's choice), and the ✕ ends it straight away.
 
 const $ = (id: string) => document.getElementById(id) as HTMLElement;
 const root = $("celebrate");
-const SHOW_MS = { party: 6000, bronze: 7000, silver: 7000, gold: 7000 };
+const SHOW_MS = { party: 40000, bronze: 40000, silver: 40000, gold: 40000 };
 let timer: number | null = null;
 
 export const MEDAL_COLOR: Record<Medal, string> = { bronze: "#9C5A2A", silver: "#C9CED6", gold: "#E8B62C" };
