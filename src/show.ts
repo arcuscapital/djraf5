@@ -194,7 +194,7 @@ export class Show {
         setTimeout(finish, 2500);
         return;
       }
-      if (music) { await music.start(0.035); await sp.sleep(700); } // softly, under his voice
+      if (music) { await music.start(0.07); await sp.sleep(700); } // softly, under his voice
       if (token !== this.token || over) return;
       const ok = await clip.play(blob, finish);
       if (!ok) { setTimeout(finish, 1500); return; }
